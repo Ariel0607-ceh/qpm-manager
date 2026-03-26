@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -21,6 +21,27 @@ export function LoginDialog({ isOpen, onClose, onLogin }: LoginDialogProps) {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
 
+  // Clear fields when dialog opens/closes
+  useEffect(() => {
+    if (!isOpen) {
+      setUsername('');
+      setPassword('');
+      setError('');
+      setShowPassword(false);
+    }
+  }, [isOpen]);
+
+  // Clear error when user types in either field
+  const handleUsernameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setUsername(e.target.value);
+    if (error) setError('');
+  };
+
+  const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setPassword(e.target.value);
+    if (error) setError('');
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
@@ -40,8 +61,21 @@ export function LoginDialog({ isOpen, onClose, onLogin }: LoginDialogProps) {
     }
   };
 
+  const handleClose = () => {
+    setUsername('');
+    setPassword('');
+    setError('');
+    setShowPassword(false);
+    onClose();
+  };
+
+  // Check if both fields are filled
+  const isFormValid = username.trim() !== '' && password.trim() !== '';
+
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
+    <Dialog open={isOpen} onOpenChange={(open) => {
+      if (!open) handleClose();
+    }}>
       <DialogContent 
         className="max-w-md border-[#d4af37]/30"
         style={{ 
@@ -79,7 +113,7 @@ export function LoginDialog({ isOpen, onClose, onLogin }: LoginDialogProps) {
               <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#778da9]" />
               <Input
                 value={username}
-                onChange={(e) => setUsername(e.target.value)}
+                onChange={handleUsernameChange}
                 placeholder="Masukkan nama pengguna"
                 className="pl-10 bg-[#0d1b2a]/50 border-[#d4af37]/30 text-[#e0e1dd] 
                   placeholder:text-[#778da9]/50 focus:border-[#d4af37]"
@@ -94,7 +128,7 @@ export function LoginDialog({ isOpen, onClose, onLogin }: LoginDialogProps) {
               <Input
                 type={showPassword ? 'text' : 'password'}
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                onChange={handlePasswordChange}
                 placeholder="Masukkan kata laluan"
                 className="pl-10 pr-10 bg-[#0d1b2a]/50 border-[#d4af37]/30 text-[#e0e1dd] 
                   placeholder:text-[#778da9]/50 focus:border-[#d4af37]"
@@ -102,7 +136,8 @@ export function LoginDialog({ isOpen, onClose, onLogin }: LoginDialogProps) {
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-[#778da9] hover:text-[#d4af37] transition-colors"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-[#778da9] hover:text-[#d4af37] transition-colors focus:outline-none"
+                tabIndex={-1}
               >
                 {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
               </button>
@@ -113,15 +148,17 @@ export function LoginDialog({ isOpen, onClose, onLogin }: LoginDialogProps) {
             <Button 
               type="button"
               variant="outline"
-              onClick={onClose}
+              onClick={handleClose}
               className="flex-1 border-[#d4af37]/30 text-[#e0e1dd] hover:bg-[#d4af37]/10"
             >
               Batal
             </Button>
             <Button 
               type="submit"
+              disabled={!isFormValid}
               className="flex-1 bg-gradient-to-r from-[#d4af37] to-[#b8960c] 
-                hover:from-[#e5c048] hover:to-[#c9a71d] text-[#0d1b2a] font-semibold"
+                hover:from-[#e5c048] hover:to-[#c9a71d] text-[#0d1b2a] font-semibold
+                disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Log Masuk
             </Button>

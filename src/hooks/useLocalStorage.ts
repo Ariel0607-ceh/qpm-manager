@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import type { AppState, Surah, UserMode } from '@/types/quran';
-import { STORAGE_KEY, AUTH_KEY, getInitialState, ADMIN_USERNAME, ADMIN_PASSWORD } from '@/types/quran';
+import { STORAGE_KEY, getInitialState, ADMIN_USERNAME, ADMIN_PASSWORD } from '@/types/quran';
 
 export function useLocalStorage() {
   const [state, setState] = useState<AppState>(getInitialState());
@@ -16,14 +16,9 @@ export function useLocalStorage() {
         setState({
           ...getInitialState(),
           ...parsed,
+          userMode: 'user',
           surahs: parsed.surahs?.length > 0 ? parsed.surahs : getInitialState().surahs
         });
-      }
-      // Check auth status
-      const auth = localStorage.getItem(AUTH_KEY);
-      if (auth === 'true') {
-        setIsAuthenticated(true);
-        setState(prev => ({ ...prev, userMode: 'admin' }));
       }
     } catch (error) {
       console.error('Error loading from localStorage:', error);
@@ -35,7 +30,12 @@ export function useLocalStorage() {
   useEffect(() => {
     if (isLoaded) {
       try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+        // Save everything EXCEPT userMode - always force 'user' on next load
+        const stateToSave = {
+          ...state,
+          userMode: 'user' // Always save as 'user', never persist 'admin'
+        };
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(stateToSave));
       } catch (error) {
         console.error('Error saving to localStorage:', error);
       }
@@ -47,7 +47,6 @@ export function useLocalStorage() {
     if (username === ADMIN_USERNAME && password === ADMIN_PASSWORD) {
       setIsAuthenticated(true);
       setState(prev => ({ ...prev, userMode: 'admin' }));
-      localStorage.setItem(AUTH_KEY, 'true');
       return true;
     }
     return false;
@@ -56,7 +55,6 @@ export function useLocalStorage() {
   const logout = useCallback(() => {
     setIsAuthenticated(false);
     setState(prev => ({ ...prev, userMode: 'user' }));
-    localStorage.removeItem(AUTH_KEY);
   }, []);
 
   const setUserMode = useCallback((mode: UserMode) => {

@@ -127,5 +127,5 @@ export const getInitialState = (): AppState => ({
 });
 
 // Admin credentials
-export const ADMIN_USERNAME = 'naufal';
-export const ADMIN_PASSWORD = 'naufal0607';
+export const ADMIN_USERNAME = 'Naufal';
+export const ADMIN_PASSWORD = 'Naufal0607';

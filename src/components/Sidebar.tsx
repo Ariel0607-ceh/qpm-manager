@@ -269,7 +269,7 @@ export function Sidebar({
       {/* Sidebar */}
       <div
         ref={sidebarRef}
-        className={`fixed left-0 top-0 h-full z-50 transition-all duration-500 ease-[cubic-bezier(0.68,-0.55,0.265,1.55)]
+        className={`fixed left-0 top-0 h-full z-50 transition-all duration-500 custom-slide
           ${isOpen ? 'w-80 translate-x-0' : 'w-20 -translate-x-full md:translate-x-0'}
         `}
         style={{
